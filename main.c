@@ -35,9 +35,9 @@ void yemek_dosyasi(const char* YemekListesi) {
 
     while (yemek_sayisi < 20 && fgets(yemekler[yemek_sayisi].adi, 100, dosya) != NULL) {
         fgets(yemekler[yemek_sayisi].adi, 100, dosya);
-        fscanf(dosya, "%d", &yemekler[yemek_sayisi].fiyati);
-        fscanf(dosya, "%d", &yemekler[yemek_sayisi].hazirlanma_suresi);
-        fscanf(dosya, "%d", &yemekler[yemek_sayisi].mevcutluk);
+        fgets(yemekler[yemek_sayisi].fiyati, 100, dosya);
+        fgets(yemekler[yemek_sayisi].hazirlanma_suresi, 100, dosya);
+        fgets(yemekler[yemek_sayisi].mevcutluk, 100, dosya);
 
         yemekler[yemek_sayisi].adi[strcspn(yemekler[yemek_sayisi].adi, "\n")] = '\0';
 
@@ -56,7 +56,7 @@ void siparisler_dosyasi(const char* MevcutSiparisler) {
 
     while (siparis_sayisi < 50 && fgets(siparisler[siparis_sayisi].id, 100, dosya) != NULL) {
         fgets(siparisler[siparis_sayisi].adi, 100, dosya);
-        fscanf(dosya, "%d", &siparisler[siparis_sayisi].fiyati);
+        fgets(siparisler[siparis_sayisi].fiyati,100 ,dosya);
         fgets(siparisler[siparis_sayisi].siparis_verilme_zamani, 100, dosya);
         fgets(siparisler[siparis_sayisi].hazirlanma_zamani, 100, dosya);
         fgets(siparisler[siparis_sayisi].kullanici, 100, dosya);
