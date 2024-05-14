@@ -26,6 +26,7 @@ typedef struct {
 siparis siparisler[50];
 int siparis_sayisi = 0;
 
+//Yemeklerin oldugu dosyayi aciyor dosya acilmazsa hata veriyor
 void yemek_dosyasi(const char* YemekListesi) {
     FILE* dosya = fopen(YemekListesi, "r");
     if (dosya == NULL) {
@@ -33,20 +34,22 @@ void yemek_dosyasi(const char* YemekListesi) {
         exit(1);
     }
 
-    while (yemek_sayisi < 20 && fgets(yemekler[yemek_sayisi].adi, 100, dosya) != NULL) {
+    while (yemek_sayisi < 20 && fgets(yemekler[yemek_sayisi].adi, 100, dosya) != NULL) {//veri cekimi baslýyor
         fgets(yemekler[yemek_sayisi].adi, 100, dosya);
         fgets(yemekler[yemek_sayisi].fiyati, 100, dosya);
         fgets(yemekler[yemek_sayisi].hazirlanma_suresi, 100, dosya);
         fgets(yemekler[yemek_sayisi].mevcutluk, 100, dosya);
 
-        yemekler[yemek_sayisi].adi[strcspn(yemekler[yemek_sayisi].adi, "\n")] = '\0';
-
+        yemekler[yemek_sayisi].adi[strcspn(yemekler[yemek_sayisi].adi, "\n")] = '\0';// \0 yerine !EOF de kullanilabir ikisi de ayni islevi goruyor satirlar karismasin diye kullaniliyor
+// strcspn de kütüphane kodu belli karakterleri aramak icin kullanýlýyo
         yemek_sayisi++;
     }
 
     fclose(dosya);
 }
 
+//Siparislerin oldugu dosyayi aciyor dosya acilmazsa hata veriyor
+//const char* da pointer const da degistirelemeyecegini gosteriyor
 void siparisler_dosyasi(const char* MevcutSiparisler) {
     FILE* dosya = fopen(MevcutSiparisler, "r");
     if (dosya == NULL) {
