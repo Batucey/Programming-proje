@@ -1,0 +1,8 @@
+2-Hamburger
+-Fiyati 250 TL
+-Hazirlanma suresi 30 dakika
+
+5-Tavuk Durum
+-Fiyati 80 TL
+-Hazirlanma suresi 15 dakika
+

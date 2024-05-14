@@ -1,54 +1,83 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
-struct Siparis {
-    char sip_id[10];
-    char sip_detay[100];
-};
+typedef struct {
+    char adi[100];
+    int fiyati;
+    int hazirlanma_suresi;
+    int mevcutluk;
+} yemek;
 
-void siparisleri_oku(char* MevcutSiparisler, struct Siparis siparisler[], int* siparis_sayisi) {
-    FILE* belge = fopen(MevcutSiparisler, "r");//Belgeden okuma
-    if (belge == NULL) {
-        printf("Aktif siparis bulunamadi.\n");
-        return;
+yemek yemekler[20];
+int yemek_sayisi = 0;
+
+typedef struct {
+    char id[100];
+    char adi[100];
+    int fiyati;
+    char siparis_verilme_zamani[100];
+    char hazirlanma_zamani[100];
+    char kullanici[100];
+    char sef[100];
+} siparis;
+
+siparis siparisler[50];
+int siparis_sayisi = 0;
+
+void yemek_dosyasi(const char* YemekListesi) {
+    FILE* dosya = fopen(YemekListesi, "r");
+    if (dosya == NULL) {
+        printf("Dosya acilamadi. %s\n", YemekListesi);
+        exit(1);
     }
-    //Siparislerin oldugu dosyayi okuyon fonk
-    //Siparislerin oldugu dosyayi okuyup eger aktif siparis yoksa siparis bulunamadi outputunu veriyor.
-    *siparis_sayisi = 0;
-    while (fscanf(belge, "%s %[^\n]", siparisler[*siparis_sayisi].sip_id, siparisler[*siparis_sayisi].sip_detay) != EOF) {
-        (*siparis_sayisi)++;
-        // %s %[^\n] Yazilan bütün seyleri okumasi için kullanilan bi kullanim.
-    }
-    fclose(belge);
 
+    while (yemek_sayisi < 20 && fgets(yemekler[yemek_sayisi].adi, 100, dosya) != NULL) {
+        fgets(yemekler[yemek_sayisi].adi, 100, dosya);
+        fscanf(dosya, "%d", &yemekler[yemek_sayisi].fiyati);
+        fscanf(dosya, "%d", &yemekler[yemek_sayisi].hazirlanma_suresi);
+        fscanf(dosya, "%d", &yemekler[yemek_sayisi].mevcutluk);
+
+        yemekler[yemek_sayisi].adi[strcspn(yemekler[yemek_sayisi].adi, "\n")] = '\0';
+
+        yemek_sayisi++;
+    }
+
+    fclose(dosya);
 }
-void siparisleri_yonet(struct Siparis siparisler[], int siparis_sayisi) {
-    char onay;
-    for (int i = 0; i < siparis_sayisi; i++) {
-        printf("Siparis idsi: %s, Detay: %s\n", siparisler[i].sip_id, siparisler[i].sip_detay);
-        printf("Siparisi onaylamak icin '1', reddetmek icin '2' girin: ");
-        scanf(" %c", &onay); //"%c" char okumak için kullanilir
-        if (onay == '1') {
-            strcat(siparisler[i].sip_detay, "Siparis Onaylandi.");
-        }
-        if  (onay == '2') {
-            strcat(siparisler[i].sip_detay, "Siparis Reddedildi.");
-        }
+
+void siparisler_dosyasi(const char* MevcutSiparisler) {
+    FILE* dosya = fopen(MevcutSiparisler, "r");
+    if (dosya == NULL) {
+        printf("Dosya acilamadi. %s\n", MevcutSiparisler);
+        exit(1);
     }
+
+    while (siparis_sayisi < 50 && fgets(siparisler[siparis_sayisi].id, 100, dosya) != NULL) {
+        fgets(siparisler[siparis_sayisi].adi, 100, dosya);
+        fscanf(dosya, "%d", &siparisler[siparis_sayisi].fiyati);
+        fgets(siparisler[siparis_sayisi].siparis_verilme_zamani, 100, dosya);
+        fgets(siparisler[siparis_sayisi].hazirlanma_zamani, 100, dosya);
+        fgets(siparisler[siparis_sayisi].kullanici, 100, dosya);
+        fgets(siparisler[siparis_sayisi].sef, 100, dosya);
+
+        siparisler[siparis_sayisi].id[strcspn(siparisler[siparis_sayisi].id, "\n")] = '\0';
+        siparisler[siparis_sayisi].adi[strcspn(siparisler[siparis_sayisi].adi, "\n")] = '\0';
+        siparisler[siparis_sayisi].siparis_verilme_zamani[strcspn(siparisler[siparis_sayisi].siparis_verilme_zamani, "\n")] = '\0';
+        siparisler[siparis_sayisi].hazirlanma_zamani[strcspn(siparisler[siparis_sayisi].hazirlanma_zamani, "\n")] = '\0';
+        siparisler[siparis_sayisi].kullanici[strcspn(siparisler[siparis_sayisi].kullanici, "\n")] = '\0';
+        siparisler[siparis_sayisi].sef[strcspn(siparisler[siparis_sayisi].sef, "\n")] = '\0';
+        siparis_sayisi++;
+    }
+
+    fclose(dosya);
 }
-//Bu fonk gelen siparisleri kontrol edip onay veya reddetmeye yariyor.
-//Restoran onay verir onaylandi vermezse reddedildi outputunu veriyor.
+
 int main() {
-    char MevcutSiparisler[100];
-    printf("Yeni siparisler belgesinin adi: ");
-    scanf("%s", MevcutSiparisler);
-
-    struct Siparis siparisler[100];
-    int siparis_sayisi;
-
-    siparisleri_oku(MevcutSiparisler, siparisler, &siparis_sayisi);
-    siparisleri_yonet(siparisler, siparis_sayisi);
+    yemek_dosyasi("yemeklistesi.txt");
+    siparisler_dosyasi("MevcutSiparisler.txt");
 
     return 0;
 }
+
