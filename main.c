@@ -5,35 +5,30 @@
 #include <unistd.h>
 
 #define MAX_SIZE 100
-#define ASCI_SAYISI 3
-int arrayYemekSira[] = {1, 2, 3, 4, 5, 6};
-char *arrayYemek[] = {
+#define MAX_LINE_LENGTH 1000
+static int arrayYemekSira[] = {1, 2, 3, 4, 5, 6};
+static char *arrayYemek[] = {
     "Lahmacun",
     "Hamburger",
     "Manti",
     "Tost",
     "Tavuk Durum",
     "Et Durum"};
-int arrayYemekFiyat[] = {75, 250, 170, 60, 80, 160};
-int arrayYemekSure[] = {20, 30, 45, 10, 15, 15};
-char *arrayYemekMevcudiyet[] = {
+static int arrayYemekFiyat[] = {75, 250, 170, 60, 80, 160};
+static int arrayYemekSure[] = {20, 30, 45, 10, 15, 15};
+static char *arrayYemekMevcudiyet[] = {
     "Mevcuttur",
     "Mevcuttur",
     "Mevcut Degildir",
     "Mevcuttur",
     "Mevcuttur",
     "Mevcut degildir"};
+int totalYemekFiyat[MAX_SIZE];
+int size = 0;
+int arrayBoyut = sizeof(arrayYemek) / sizeof(arrayYemek[0]);
+char *arrayAsci[] = {"Asci1", "Asci2", "Asci3", "Asci4", "Asci5"};
+
 int randomNumbers[MAX_SIZE];
-
-// Asci yapısı
-typedef struct {
-    int id;
-    int bosta;
-    int musaitlik; // Ascinin sonraki musait olma zamani
-} asci;
-
-asci ascilar[ASCI_SAYISI];
-
 void randomNumberGenerator()
 {
     srand(time(NULL));
@@ -43,28 +38,6 @@ void randomNumberGenerator()
     }
 }
 
-// Ascilari baslat
-void Ascilar_baslat()
-{
-    for (int i = 0; i < ASCI_SAYISI; i++)
-    {
-        ascilar[i].id = i + 1;
-        ascilar[i].bosta = 1; // Hepsi bosta
-        ascilar[i].musaitlik = 0;
-    }
-}
-
-// Musait asciyi bul fonku
-int musait_asciyi_bul(){
-    for (int i = 0; i < ASCI_SAYISI; i++)
-    {
-        if (ascilar[i].bosta)
-        {
-            return i;
-        }
-    }
-    return -1; // Bos asci bulunamadi
-}
 void yemekListesiGoster()
 {
     FILE *yemekListesi = fopen("YemekListesi.txt", "r");
@@ -86,7 +59,6 @@ void yemekListesiGoster()
 
 void musteriPanel()
 {
-
     yemekTakip();
 }
 
@@ -100,12 +72,12 @@ void yeniSiparis()
     {
         printf("\nYemek istediginiz numarayi giriniz:");
         scanf("%d", &yeniYemekSiparis);
-        if (yeniYemekSiparis < 1 || yeniYemekSiparis > 6 || yeniYemekSiparis == 3 || yeniYemekSiparis == 6)
+        if (yeniYemekSiparis < 1 || yeniYemekSiparis > arrayBoyut || yeniYemekSiparis == 3 || yeniYemekSiparis == 6)
         {
             printf("%d numarali menu yoktur.\n", yeniYemekSiparis);
             printf("Gecerli bir menu seciniz:\n");
         }
-    } while (yeniYemekSiparis < 1 || yeniYemekSiparis > 6 || yeniYemekSiparis == 3 || yeniYemekSiparis == 6);
+    } while (yeniYemekSiparis < 1 || yeniYemekSiparis > arrayBoyut || yeniYemekSiparis == 3 || yeniYemekSiparis == 6);
 
     FILE *yeniSiparisEklemeTXT = fopen("MevcutSiparisler.txt", "a");
     if (yeniSiparisEklemeTXT == NULL)
@@ -114,38 +86,15 @@ void yeniSiparis()
         return;
     }
 
-        int musait_asci_sayisi = musait_asciyi_bul();
-    if (musait_asci_sayisi == -1)
-    {
-        printf("Su anda musait asci yok. Lutfen daha sonra tekrar deneyiniz.\n");
-        return;
-    }
-
-    asci *asci = &ascilar[musait_asci_sayisi];
-
     int i = yeniYemekSiparis;
-    int currentTime = time(NULL);
-    int hazirlanmaSure = arrayYemekSure[i - 1];
-    int tamamlanmaZamani = currentTime + hazirlanmaSure * 60;
-
     fprintf(yeniSiparisEklemeTXT, "ID numarasi:%d\n", randomNumbers[i - 1]);
     fprintf(yeniSiparisEklemeTXT, "-%s\n", arrayYemek[i - 1]);
     fprintf(yeniSiparisEklemeTXT, "-Fiyati %d TL\n", arrayYemekFiyat[i - 1]);
-    fprintf(yeniSiparisEklemeTXT, "-Hazirlanma suresi %d dakika\n", hazirlanmaSure);
-    fprintf(yeniSiparisEklemeTXT, "-Asci ID:%d\n", asci->id);
-    fprintf(yeniSiparisEklemeTXT, "-Tamamlanmazamani: %s", ctime(&tamamlanmaZamani));
+    fprintf(yeniSiparisEklemeTXT, "-Hazirlanma suresi %d dakika\n", arrayYemekSure[i - 1]);
     fprintf(yeniSiparisEklemeTXT, "\n");
-
+    printf("%d siparisi eklendi\n", yeniYemekSiparis);
+    printf("\n");
     fclose(yeniSiparisEklemeTXT);
-
-    printf("%d numarali siparis asci %d tarafindan hazirlanacak ve %d dakika icinde tamamlanacak.\n", yeniYemekSiparis, asci->id, hazirlanmaSure);
-
-    asci->bosta = 0;
-    asci->musaitlik = tamamlanmaZamani;
-
-    sleep(hazirlanmaSure * 60); // Gercek zamanli uyku belirtilen süre kadar bekler
-
-    asci->bosta = 1; // Asci tekrar musait
 }
 
 void eskiSiparisler()
@@ -191,7 +140,6 @@ void mevcutSiparisler()
 void yemekTakip()
 {
     int secenek;
-    int secim;
 
     printf("1-Yeni Siparis\n");
     printf("2-Mevcut Siparisler\n");
@@ -224,7 +172,7 @@ void restoranPanel()
 }
 void arrayiDosyayaYaz(FILE *dosya)
 {
-    for (int i = 0; i < sizeof(arrayYemekFiyat) / sizeof(arrayYemekFiyat[0]); i++)
+    for (int i = 0; i < MAX_SIZE; i++)
     {
         fprintf(dosya, "%d-%s\n-Fiyati %d TL\n-Hazirlanma suresi %d dakika\n-%s\n\n", arrayYemekSira[i], arrayYemek[i], arrayYemekFiyat[i], arrayYemekSure[i], arrayYemekMevcudiyet[i]);
     }
@@ -306,7 +254,7 @@ void yemekGuncelleme()
     {
         char yeniYeniMevcut[20];
         printf("yeni yemek mevcudiyetini girin:");
-        scanf(" % [^\n] ", yeniYeniMevcut);
+        scanf("%[^\n] ", yeniYeniMevcut);
         arrayYemekMevcudiyet[arrayMenuSecim - 1] = yeniYeniMevcut;
     }
 
@@ -323,7 +271,7 @@ void yemekEkleme()
     if (YemekListesi == NULL)
     {
         printf("Dosya acilamadi!\n");
-        return 1;
+        return;
     }
 
     char **arrayYemek;
@@ -370,7 +318,7 @@ void yemekEkleme()
     if (yemekListesi == NULL)
     {
         printf("yemek listesi bulunamadi!");
-        return 1;
+        return;
     }
 
     while ((karakter = fgetc(yemekListesi)) != EOF)
@@ -383,7 +331,7 @@ void yemekEkleme()
 
     int yemekSatirSayisi = satirSayisi / 5 + 1;
 
-    fprintf(YemekListesi, "\n%d-%s:.\n-%d TL.\n-Hazirlanma suresi %d dakikadir.\n-%s\n", yemekSatirSayisi, yemekIsmi, yemekFiyat, yemekSure, yemekMevcut);
+    fprintf(YemekListesi, "\n%d-%s\n-%d TL\n-Hazirlanma suresi %d dakikadir\n-%s\n", yemekSatirSayisi, yemekIsmi, yemekFiyat, yemekSure, yemekMevcut);
 
     free(arrayYemek);
     free(yemekArrayFiyat);
@@ -393,16 +341,14 @@ void yemekEkleme()
     yemekListesiGoster();
 }
 
-void yemekSilme(int index)
+void yemekSilme()
 {
     int silinecekIndex;
     printf("Silmek istediginiz menuyu secin: ");
     scanf("%d", &silinecekIndex);
 
-    // Menüyü sil
     menuSil(silinecekIndex - 1);
 
-    // Dosyayı yeniden yazarak güncellenmiş array verilerini dosyaya aktar
     FILE *dosya = fopen("YemekListesi.txt", "w");
     if (dosya == NULL)
     {
@@ -419,24 +365,14 @@ void yemekSilme(int index)
 
 void menuSil(int index)
 {
-    // Silinecek menüye ait verileri boşalt
-    for (int i = index; i < sizeof(arrayYemek) / sizeof(arrayYemek[0]); i++)
+    arrayBoyut--;
+    for (int i = index; i < arrayBoyut; i++)
     {
         arrayYemek[i] = arrayYemek[i + 1];
         arrayYemekFiyat[i] = arrayYemekFiyat[i + 1];
         arrayYemekSure[i] = arrayYemekSure[i + 1];
         arrayYemekMevcudiyet[i] = arrayYemekMevcudiyet[i + 1];
     }
-
-    // Dizinin boyutunu bir azalt
-    int yeniBoyut = sizeof(arrayYemek) / sizeof(arrayYemek[0]) - 1;
-    arrayYemekSira[yeniBoyut] = 0;
-    arrayYemek[yeniBoyut] = NULL;
-    arrayYemekFiyat[yeniBoyut] = 0;
-    arrayYemekSure[yeniBoyut] = 0;
-    arrayYemekMevcudiyet[yeniBoyut] = NULL;
-
-    // SİLİNEN YERE 0 VE NULL YAZMAYACAK VE BİRDEN FAZLA KEZ SİLME İŞLEMİ YAPABİLECEK KOD ORDA KALDIK
 }
 
 void onayRedIslemleri()
@@ -490,14 +426,51 @@ void onayRedIslemleri()
                 fprintf(onaylananSiparisler, "-Hazirlanma suresi %d dakika\n", arrayYemekSure[i]);
                 fprintf(onaylananSiparisler, "\n");
                 fclose(onaylananSiparisler);
-                printf("Siparis onaylandi.");
+                printf("Siparis onaylandi.\n");
                 printf("\n");
+                siparisHazirlama();
+
                 break;
             }
             else if (onayRed == 2)
             {
                 printf("ID dogru!\n");
-                printf("Siparis reddedildi.\n");
+                printf("Siparis reddedildi.\nSiparis listeden silindi!\n");
+
+                // Mevcut siparislerden reddedilen siparisi sil
+                FILE *mevcutSiparisler = fopen("MevcutSiparisler.txt", "r");
+                FILE *geciciDosya = fopen("GeciciMevcutSiparisler.txt", "w");
+                char satir[500];
+                int skip = 0;
+
+                if (mevcutSiparisler == NULL || geciciDosya == NULL)
+                {
+                    printf("Dosya bulunamadi!\n");
+                    return;
+                }
+
+                while (fgets(satir, sizeof(satir), mevcutSiparisler) != NULL)
+                {
+                    // Reddedilen siparisi atla
+                    if (strstr(satir, "ID numarasi:") && atoi(&satir[strlen("ID numarasi:")]) == randomNumbers[i])
+                    {
+                        skip = 5; // ID ve 4 satiri atla (ID, yemek, fiyat, sure ve bos satir)
+                    }
+                    if (skip > 0)
+                    {
+                        skip--;
+                        continue;
+                    }
+                    fputs(satir, geciciDosya);
+                }
+
+                fclose(mevcutSiparisler);
+                fclose(geciciDosya);
+
+                // Orijinal dosyayi sil ve gecici dosyayi yeniden adlandir
+                remove("MevcutSiparisler.txt");
+                rename("GeciciMevcutSiparisler.txt", "MevcutSiparisler.txt");
+
                 break;
             }
             else
@@ -512,6 +485,203 @@ void onayRedIslemleri()
         printf("ID bulunamadi!\n");
     }
 }
+void mevcutSiparislerdenMenuSilme()
+{
+
+    int oncekiSiparisBuyukluk = sizeof(randomNumbers) / sizeof(randomNumbers[0]);
+    for (int i = 0; i < oncekiSiparisBuyukluk; i++)
+    {
+        FILE *mevcutSiparisler = fopen("MevcutSiparisler.txt", "r");
+        FILE *geciciDosya = fopen("GeciciMevcutSiparisler.txt", "w");
+        char satir[500];
+        int skip = 0;
+
+        if (mevcutSiparisler == NULL || geciciDosya == NULL)
+        {
+            printf("Dosya bulunamadi!\n");
+            return;
+        }
+
+        while (fgets(satir, sizeof(satir), mevcutSiparisler) != NULL)
+        {
+            // Reddedilen siparisi atla
+            if (strstr(satir, "ID numarasi:") && atoi(&satir[strlen("ID numarasi:")]) == randomNumbers[i])
+            {
+                skip = 5; // ID ve 4 satiri atla (ID, yemek, fiyat, sure ve bos satir)
+            }
+            if (skip > 0)
+            {
+                skip--;
+                continue;
+            }
+            fputs(satir, geciciDosya);
+        }
+
+        fclose(mevcutSiparisler);
+        fclose(geciciDosya);
+
+        // Orijinal dosyayi sil ve gecici dosyayi yeniden adlandir
+        remove("MevcutSiparisler.txt");
+        rename("GeciciMevcutSiparisler.txt", "MevcutSiparisler.txt");
+    }
+}
+
+void siparisHazirlama(int *totalYemekFiyat)
+{
+    FILE *onaylananSiparisler = fopen("onaylananSiparisler.txt", "r");
+    char karakter[500];
+
+    if (onaylananSiparisler == NULL)
+    {
+        printf("Dosya Bulunamadi!\n");
+        return;
+    }
+
+    while (fgets(karakter, sizeof(karakter), onaylananSiparisler) != NULL)
+    {
+        printf("%s", karakter);
+    }
+
+    int hazirlanacakSiparis;
+    printf("Hazirlanacak Siparisi ID Seciniz: ");
+    scanf("%d", &hazirlanacakSiparis);
+
+    int IDBulundu = 0;
+
+    for (int i = 0; i < MAX_SIZE; i++)
+    {
+        if (hazirlanacakSiparis == randomNumbers[i])
+        {
+            printf("ID Dogru!\n");
+            mevcutSiparislerdenMenuSilme();
+            FILE *hazirlananSiparisler = fopen("hazirlananSiparisler.txt", "a");
+            if (hazirlananSiparisler == NULL)
+            {
+                printf("Dosya Bulunamadi!\n");
+                return;
+            }
+            fprintf(hazirlananSiparisler, "ID numarasi:%d\n", randomNumbers[i]);
+            fprintf(hazirlananSiparisler, "-%s\n", arrayYemek[i]);
+            fprintf(hazirlananSiparisler, "-Fiyati %d TL\n", arrayYemekFiyat[i]);
+            fprintf(hazirlananSiparisler, "-Hazirlanma suresi %d dakika\n", arrayYemekSure[i]);
+            fprintf(hazirlananSiparisler, "\n");
+            fclose(hazirlananSiparisler);
+            printf("Siparisiniz hazirlaniyor...\n");
+
+            int aktifAsci = 3; // Örnek aşçı sayısı
+            sleep(3);
+            hazirlanmisSiparisler();
+            printf("Siparisiniz Yola cikti!\n");
+            sleep(3);
+
+            int siparisOnayKod = 1234;
+            int siparisOnayMusteriKod;
+
+            do
+            {
+                printf("Siparis Teslim Kodunuzu Girin: ");
+                scanf("%d", &siparisOnayMusteriKod);
+
+                if (siparisOnayKod == siparisOnayMusteriKod)
+                {
+                    printf("Siparisiniz Teslim Edildi\n");
+
+                    FILE *oncekiSiparisler = fopen("OncekiSiparisler.txt", "a");
+                    if (oncekiSiparisler == NULL)
+                    {
+                        printf("Dosya Bulunamadi!\n");
+                        return;
+                    }
+
+                    fprintf(oncekiSiparisler, "%d-", i + 1);
+                    fprintf(oncekiSiparisler, "%s\n", arrayYemek[i]);
+                    fprintf(oncekiSiparisler, "-Fiyati %d TL\n", arrayYemekFiyat[i]);
+                    fprintf(oncekiSiparisler, "\n");
+                    fclose(oncekiSiparisler);
+                }
+                else
+                {
+                    printf("Teslim Kodunuz Yanlis! Tekrar Deneyin!\n");
+                }
+            } while (siparisOnayKod != siparisOnayMusteriKod);
+
+            FILE *onaylananSiparisler = fopen("onaylananSiparisler.txt", "r");
+            FILE *geciciDosya = fopen("geciciDosya.txt", "w");
+
+            char satir[500];
+            int skip = 0;
+
+            if (onaylananSiparisler == NULL || geciciDosya == NULL)
+            {
+                printf("Dosya Bulunamadi!\n");
+                if (onaylananSiparisler != NULL)
+                    fclose(onaylananSiparisler);
+                if (geciciDosya != NULL)
+                    fclose(geciciDosya);
+                return;
+            }
+
+            while (fgets(satir, sizeof(satir), onaylananSiparisler) != NULL)
+            {
+                char *ptr = strstr(satir, "ID numarasi: ");
+                if (ptr != NULL && atoi(ptr + strlen("ID numarasi: ")) == randomNumbers[i])
+                {
+                    skip = 5; // ID ve 4 satiri atla (ID, yemek, fiyat, sure ve bos satir)
+                }
+                if (skip > 0)
+                {
+                    skip--;
+                    continue;
+                }
+                fputs(satir, geciciDosya);
+            }
+
+            fclose(onaylananSiparisler);
+            fclose(geciciDosya);
+            remove("onaylananSiparisler.txt");
+            rename("geciciDosya.txt", "onaylananSiparisler.txt");
+        }
+    }
+}
+
+void hazirlanmisSiparisler()
+{
+    for (int i = 0; i < MAX_SIZE; i++)
+    {
+        FILE *hazirlananSiparisler = fopen("hazirlananSiparisler.txt", "r");
+        FILE *geciciHazirlananSiparisler = fopen("GecicihazirlananSiparisler.txt", "w");
+        char satir[500];
+        int skip = 0;
+
+        if (hazirlananSiparisler == NULL || geciciHazirlananSiparisler == NULL)
+        {
+            printf("Dosya bulunamadi!\n");
+            return;
+        }
+
+        while (fgets(satir, sizeof(satir), hazirlananSiparisler) != NULL)
+        {
+            // Reddedilen siparisi atla
+            if (strstr(satir, "ID numarasi:") && atoi(&satir[strlen("ID numarasi:")]) == randomNumbers[i])
+            {
+                skip = 5; // ID ve 4 satiri atla (ID, yemek, fiyat, sure ve bos satir)
+            }
+            if (skip > 0)
+            {
+                skip--;
+                continue;
+            }
+            fputs(satir, geciciHazirlananSiparisler);
+        }
+
+        fclose(hazirlananSiparisler);
+        fclose(geciciHazirlananSiparisler);
+
+        // Orijinal dosyayi sil ve gecici dosyayi yeniden adlandir
+        remove("hazirlananSiparisler.txt");
+        rename("GecicihazirlananSiparisler.txt", "hazirlananSiparisler.txt");
+    }
+}
 
 void yemekSecimIslemleri()
 {
@@ -519,8 +689,8 @@ void yemekSecimIslemleri()
 
     printf("1-Yemek ekleme-guncelleme-silme \n");
     printf("2-Yeni siparis onay/red \n");
-    printf("3-Gunluk rapor alma/goruntuleme \n");
-    printf("4-Analizler \n");
+    printf("3-Analizler \n");
+    // ANALİZ İÇERİSİNDE FOR İLE HER GÜNE AİT BİLGİLERİ *1.GÜN *2.GÜN ŞEKLİNDE TİME İLE BELİRTİLECEK.
     printf("Yapmak istediginiz islemi secin:");
     scanf("%d", &islemSecim);
     printf("\n");
@@ -533,7 +703,41 @@ void yemekSecimIslemleri()
     case 2:
         onayRedIslemleri();
         break;
+    case 3:
+        analizIslemleri(totalYemekFiyat, &size);
+        break;
     }
+}
+void analizIslemleri(int *totalYemekFiyat, int *size)
+{
+    FILE *siparisler = fopen("OncekiSiparisler.txt", "r");
+    char satir[MAX_LINE_LENGTH];
+    int index = -1;
+    int total = 0;
+
+    if (siparisler == NULL)
+    {
+        printf("Dosya Bulunamadi!");
+        return;
+    }
+
+    while (fgets(satir, sizeof(satir), siparisler))
+    {
+        satir[strcspn(satir, "\n")] = '\0';
+
+        if (strstr(satir, "-Fiyati") != NULL)
+        {
+            sscanf(satir, "-Fiyati %d TL", &totalYemekFiyat[index]);
+            total += totalYemekFiyat[index];
+            index++;
+        }
+    }
+
+    fclose(siparisler);
+
+    *size = index;
+
+    printf("Gunluk Toplam Ciro: %d TL", total);
 }
 /* !********************************************************************************************************************************************************************************************! */
 

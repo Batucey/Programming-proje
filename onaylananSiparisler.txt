@@ -1,0 +1,5 @@
+ID numarasi:761
+-Hamburger
+-Fiyati 250 TL
+-Hazirlanma suresi 30 dakika
+
