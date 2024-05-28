@@ -1,3 +1,7 @@
+// AHMET YORGANCI 425442
+// İREM AYTEKİN 434410
+// BATUHAN CEYHAN 434368
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -6,17 +10,17 @@
 
 #define MAX_SIZE 100
 #define MAX_LINE_LENGTH 1000
-static int arrayYemekSira[] = {1, 2, 3, 4, 5, 6};
-static char *arrayYemek[] = {
+int arrayYemekSira[] = {1, 2, 3, 4, 5, 6};
+char *arrayYemek[] = {
     "Lahmacun",
     "Hamburger",
     "Manti",
     "Tost",
     "Tavuk Durum",
     "Et Durum"};
-static int arrayYemekFiyat[] = {75, 250, 170, 60, 80, 160};
-static int arrayYemekSure[] = {20, 30, 45, 10, 15, 15};
-static char *arrayYemekMevcudiyet[] = {
+int arrayYemekFiyat[] = {75, 250, 170, 60, 80, 160};
+int arrayYemekSure[] = {20, 30, 45, 10, 15, 15};
+char *arrayYemekMevcudiyet[] = {
     "Mevcuttur",
     "Mevcuttur",
     "Mevcut Degildir",
@@ -25,7 +29,7 @@ static char *arrayYemekMevcudiyet[] = {
     "Mevcut degildir"};
 int totalYemekFiyat[MAX_SIZE];
 int size = 0;
-int arrayBoyut = sizeof(arrayYemek) / sizeof(arrayYemek[0]);
+int arrayBoyut = sizeof(arrayYemekFiyat) / sizeof(arrayYemekFiyat[0]); // herhangi bir arrayin içeriisndeki eleman sayisini bulmaya yarar.
 char *arrayAsci[] = {"Asci1", "Asci2", "Asci3", "Asci4", "Asci5"};
 
 int randomNumbers[MAX_SIZE];
@@ -53,6 +57,7 @@ void yemekListesiGoster()
     {
         printf("%s", sira);
     }
+    // YEMEK LİSTESİ İÇERİİSNDEKİ BİLGİLERİ YAZDIRMAYI SAĞLAYAN İFADE
 
     fclose(yemekListesi);
 }
@@ -70,6 +75,7 @@ void yeniSiparis()
 
     do
     {
+        // LİSTEDEKİ ELEMANLAR DIŞINDA BİR ELEMAN GİRİLİRSE SONSUZ DÖNGÜYE ALIR VE İSTENİLEN İFADE GİRİLENE KADAR SEÇTİRMEYE DEVAM EDER.
         printf("\nYemek istediginiz numarayi giriniz:");
         scanf("%d", &yeniYemekSiparis);
         if (yeniYemekSiparis < 1 || yeniYemekSiparis > arrayBoyut || yeniYemekSiparis == 3 || yeniYemekSiparis == 6)
@@ -100,7 +106,7 @@ void yeniSiparis()
 void eskiSiparisler()
 {
     FILE *oncekiSiparisler = fopen("OncekiSiparisler.txt", "r");
-    char oncekiYemek[100]; // Changed to array to store lines
+    char oncekiYemek[100];
 
     if (oncekiSiparisler == NULL)
     {
@@ -119,7 +125,7 @@ void eskiSiparisler()
 void mevcutSiparisler()
 {
     FILE *mevcutSiparisListesi = fopen("MevcutSiparisler.txt", "r");
-    char mevcutYemek[100]; // Changed to array to store lines
+    char mevcutYemek[100];
 
     if (mevcutSiparisListesi == NULL)
     {
@@ -170,9 +176,11 @@ void restoranPanel()
 {
     yemekSecimIslemleri();
 }
+
 void arrayiDosyayaYaz(FILE *dosya)
 {
-    for (int i = 0; i < MAX_SIZE; i++)
+    fprintf(dosya, "%s\n", "Yemek Listesi:");
+    for (int i = 0; i < sizeof(arrayYemekFiyat) / sizeof(arrayYemekFiyat[0]); i++)
     {
         fprintf(dosya, "%d-%s\n-Fiyati %d TL\n-Hazirlanma suresi %d dakika\n-%s\n\n", arrayYemekSira[i], arrayYemek[i], arrayYemekFiyat[i], arrayYemekSure[i], arrayYemekMevcudiyet[i]);
     }
@@ -254,7 +262,8 @@ void yemekGuncelleme()
     {
         char yeniYeniMevcut[20];
         printf("yeni yemek mevcudiyetini girin:");
-        scanf("%[^\n] ", yeniYeniMevcut);
+        scanf(" %[^\n] ", yeniYeniMevcut);
+        //  %[^\n] İFADESİ BİRDEN FAZLA STRİNG İFADE NORMAL ŞARTLARDA SCANF İLE ALINAMAZ. BU İFADE KOLAY YOLDAN BİRDEN FAZLA STRİNG İFADEYİ TEK SEFERDE ALMAYA YARAR.
         arrayYemekMevcudiyet[arrayMenuSecim - 1] = yeniYeniMevcut;
     }
 
@@ -264,6 +273,7 @@ void yemekGuncelleme()
 
     fclose(yemekListesi);
 }
+
 void yemekEkleme()
 {
     FILE *YemekListesi;
@@ -365,14 +375,21 @@ void yemekSilme()
 
 void menuSil(int index)
 {
+    FILE *yemekListesi = fopen("YemekListesi.txt", "r+");
     arrayBoyut--;
-    for (int i = index; i < arrayBoyut; i++)
+
+    for (int i = index; i < arrayBoyut - 1; i++)
     {
-        arrayYemek[i] = arrayYemek[i + 1];
+        arrayYemekSira[i] = arrayYemekSira[i + 1];
+        strcpy(arrayYemek[i], arrayYemek[i + 1]);
         arrayYemekFiyat[i] = arrayYemekFiyat[i + 1];
         arrayYemekSure[i] = arrayYemekSure[i + 1];
-        arrayYemekMevcudiyet[i] = arrayYemekMevcudiyet[i + 1];
+        strcpy(arrayYemekMevcudiyet[i], arrayYemekMevcudiyet[i + 1]);
     }
+
+    // Güncellenmiş listeyi dosyaya yaz
+    arrayiDosyayaYaz(yemekListesi);
+    fclose(yemekListesi);
 }
 
 void onayRedIslemleri()
@@ -437,7 +454,6 @@ void onayRedIslemleri()
                 printf("ID dogru!\n");
                 printf("Siparis reddedildi.\nSiparis listeden silindi!\n");
 
-                // Mevcut siparislerden reddedilen siparisi sil
                 FILE *mevcutSiparisler = fopen("MevcutSiparisler.txt", "r");
                 FILE *geciciDosya = fopen("GeciciMevcutSiparisler.txt", "w");
                 char satir[500];
@@ -451,7 +467,7 @@ void onayRedIslemleri()
 
                 while (fgets(satir, sizeof(satir), mevcutSiparisler) != NULL)
                 {
-                    // Reddedilen siparisi atla
+                    // Reddedilen siparisi atla algoritması
                     if (strstr(satir, "ID numarasi:") && atoi(&satir[strlen("ID numarasi:")]) == randomNumbers[i])
                     {
                         skip = 5; // ID ve 4 satiri atla (ID, yemek, fiyat, sure ve bos satir)
@@ -467,7 +483,6 @@ void onayRedIslemleri()
                 fclose(mevcutSiparisler);
                 fclose(geciciDosya);
 
-                // Orijinal dosyayi sil ve gecici dosyayi yeniden adlandir
                 remove("MevcutSiparisler.txt");
                 rename("GeciciMevcutSiparisler.txt", "MevcutSiparisler.txt");
 
@@ -507,6 +522,8 @@ void mevcutSiparislerdenMenuSilme()
             // Reddedilen siparisi atla
             if (strstr(satir, "ID numarasi:") && atoi(&satir[strlen("ID numarasi:")]) == randomNumbers[i])
             {
+                // atoi fonksiyonu string.h kütüphanesi ile gelir ve içerisinde yazan bilgiyi satir ifadesinden okuduktan sonra silme işlemini gerçekleştirir.Yani silme yapmak için bir nevi içerisindeki ifadeyi referans alır
+
                 skip = 5; // ID ve 4 satiri atla (ID, yemek, fiyat, sure ve bos satir)
             }
             if (skip > 0)
@@ -520,7 +537,6 @@ void mevcutSiparislerdenMenuSilme()
         fclose(mevcutSiparisler);
         fclose(geciciDosya);
 
-        // Orijinal dosyayi sil ve gecici dosyayi yeniden adlandir
         remove("MevcutSiparisler.txt");
         rename("GeciciMevcutSiparisler.txt", "MevcutSiparisler.txt");
     }
@@ -568,8 +584,8 @@ void siparisHazirlama(int *totalYemekFiyat)
             fclose(hazirlananSiparisler);
             printf("Siparisiniz hazirlaniyor...\n");
 
-            int aktifAsci = 3; // Örnek aşçı sayısı
             sleep(3);
+            // ASENKRON TİME İŞLEMLERİNİN GERÇEKLEŞTİĞİ FONKSİYONDUR. UNİSTD.H KÜTÜPHANESİ İLE GELİR
             hazirlanmisSiparisler();
             printf("Siparisiniz Yola cikti!\n");
             sleep(3);
@@ -626,6 +642,7 @@ void siparisHazirlama(int *totalYemekFiyat)
                 char *ptr = strstr(satir, "ID numarasi: ");
                 if (ptr != NULL && atoi(ptr + strlen("ID numarasi: ")) == randomNumbers[i])
                 {
+                    // atoi fonksiyonu string.h kütüphanesi ile gelir ve içerisinde yazan bilgiyi satir ifadesinden okuduktan sonra silme işlemini gerçekleştirir.Yani silme yapmak için bir nevi içerisindeki ifadeyi referans alır
                     skip = 5; // ID ve 4 satiri atla (ID, yemek, fiyat, sure ve bos satir)
                 }
                 if (skip > 0)
@@ -664,6 +681,7 @@ void hazirlanmisSiparisler()
             // Reddedilen siparisi atla
             if (strstr(satir, "ID numarasi:") && atoi(&satir[strlen("ID numarasi:")]) == randomNumbers[i])
             {
+                // atoi fonksiyonu string.h kütüphanesi ile gelir ve içerisinde yazan bilgiyi satir ifadesinden okuduktan sonra silme işlemini gerçekleştirir.Yani silme yapmak için bir nevi içerisindeki ifadeyi referans alır
                 skip = 5; // ID ve 4 satiri atla (ID, yemek, fiyat, sure ve bos satir)
             }
             if (skip > 0)
